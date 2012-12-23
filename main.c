@@ -78,6 +78,8 @@ char ecommt[MAXCCHARS+1] = {ECOMMT};	/* end character for comment   */
 int  synch_lines = 0;		/* line synchronisation for C preprocessor */
 int  prefix_builtins = 0;	/* -P option to prefix builtin keywords */
 
+char *__progname;
+
 struct keyblk {
         char    *knam;          /* keyword name */
         int     ktyp;           /* keyword type */
@@ -171,6 +173,8 @@ main(int argc, char *argv[])
 	int c;
 	int n;
 	char *p;
+	
+	__progname = argv[0];
 
 	if (signal(SIGINT, SIG_IGN) != SIG_IGN)
 		signal(SIGINT, onintr);
