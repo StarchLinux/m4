@@ -1,0 +1,351 @@
+M4(1)                     BSD General Commands Manual                    M4(1)
+
+NNAAMMEE
+     mm44 — macro language processor
+
+SSYYNNOOPPSSIISS
+     mm44 [--ggPPss] [--DD_n_a_m_e[=_v_a_l_u_e]] [--dd _f_l_a_g_s] [--II _d_i_r_n_a_m_e] [--oo _f_i_l_e_n_a_m_e]
+        [--tt _m_a_c_r_o] [--UU_n_a_m_e] [_f_i_l_e _._._.]
+
+DDEESSCCRRIIPPTTIIOONN
+     The mm44 utility is a macro processor that can be used as a front end to
+     any language (e.g., C, ratfor, fortran, lex, and yacc).  If no input
+     files are given, mm44 reads from the standard input, otherwise files speci‐
+     fied on the command line are processed in the given order.  Input files
+     can be regular files, files in the m4 include paths, or a single dash
+     (‘-’), denoting standard input.  mm44 writes the processed text to the
+     standard output, unless told otherwise.
+
+     Macro calls have the form name(argument1[, argument2, ..., argumentN]).
+
+     There cannot be any space following the macro name and the open parenthe‐
+     sis (‘(’).  If the macro name is not followed by an open parenthesis it
+     is processed with no arguments.
+
+     Macro names consist of a leading alphabetic or underscore possibly fol‐
+     lowed by alphanumeric or underscore characters, e.g., valid macro names
+     match the pattern “[a-zA-Z_][a-zA-Z0-9_]*”.
+
+     In arguments to macros, leading unquoted space, tab, and newline (‘\n’)
+     characters are ignored.  To quote strings, use left and right single
+     quotes (e.g.,  ‘ this is a string with a leading space’).  You can change
+     the quote characters with the cchhaannggeeqquuoottee built-in macro.
+
+     Most built-ins don't make any sense without arguments, and hence are not
+     recognized as special when not followed by an open parenthesis.
+
+     The options are as follows:
+
+     --DD_n_a_m_e[=_v_a_l_u_e]
+             Define the symbol _n_a_m_e to have some value (or NULL).
+
+     --dd _f_l_a_g_s
+             Set trace flags.  _f_l_a_g_s may hold the following:
+
+             _a       print macro arguments.
+
+             _c       print macro expansion over several lines.
+
+             _e       print result of macro expansion.
+
+             _f       print filename location.
+
+             _l       print line number.
+
+             _q       quote arguments and expansion with the current quotes.
+
+             _t       start with all macros traced.
+
+             _x       number macro expansions.
+
+             _V       turn on all options.
+
+             By default, trace is set to "eq".
+
+     --gg      Activate GNU-m4 compatibility mode.  In this mode, translit han‐
+             dles simple character ranges (e.g., a-z), regular expressions
+             mimic emacs behavior, multiple m4wrap calls are handled as a
+             stack, the number of diversions is unlimited, empty names for
+             macro definitions are allowed, and eval understands
+             ‘0rbase:value’ numbers.
+
+     --II _d_i_r_n_a_m_e
+             Add directory _d_i_r_n_a_m_e to the include path.
+
+     --oo _f_i_l_e_n_a_m_e
+             Send trace output to _f_i_l_e_n_a_m_e.
+
+     --PP      Prefix all built-in macros with ‘m4_’.  For example, instead of
+             writing ddeeffiinnee, use mm44__ddeeffiinnee.
+
+     --ss      Output line synchronization directives, suitable for cpp(1).
+
+     --tt _m_a_c_r_o
+             Turn tracing on for _m_a_c_r_o.
+
+     --UU_n_a_m_e  Undefine the symbol _n_a_m_e.
+
+SSYYNNTTAAXX
+     mm44 provides the following built-in macros.  They may be redefined, losing
+     their original meaning.  Return values are null unless otherwise stated.
+
+     bbuuiillttiinn(_n_a_m_e)
+                  Calls a built-in by its _n_a_m_e, overriding possible redefini‐
+                  tions.
+
+     cchhaannggeeccoomm(_s_t_a_r_t_c_o_m_m_e_n_t, _e_n_d_c_o_m_m_e_n_t)
+                  Changes the start comment and end comment sequences.  Com‐
+                  ment sequences may be up to five characters long.  The
+                  default values are the hash sign and the newline character.
+
+                        # This is a comment
+
+                  With no arguments, comments are turned off.  With one single
+                  argument, the end comment sequence is set to the newline
+                  character.
+
+     cchhaannggeeqquuoottee(_b_e_g_i_n_q_u_o_t_e, _e_n_d_q_u_o_t_e)
+                  Defines the open quote and close quote sequences.  Quote
+                  sequences may be up to five characters long.  The default
+                  values are the backquote character and the quote character.
+
+                        `Here is a quoted string'
+
+                  With no arguments, the default quotes are restored.  With
+                  one single argument, the close quote sequence is set to the
+                  newline character.
+
+     ddeeccrr(_a_r_g)    Decrements the argument _a_r_g by 1.  The argument _a_r_g must be
+                  a valid numeric string.
+
+     ddeeffiinnee(_n_a_m_e, _v_a_l_u_e)
+                  Define a new macro named by the first argument _n_a_m_e to have
+                  the value of the second argument _v_a_l_u_e.  Each occurrence of
+                  ‘$n’ (where _n is 0 through 9) is replaced by the _n'th argu‐
+                  ment.  ‘$0’ is the name of the calling macro.  Undefined
+                  arguments are replaced by a null string.  ‘$#’ is replaced
+                  by the number of arguments; ‘$*’ is replaced by all argu‐
+                  ments comma separated; ‘$@’ is the same as ‘$*’ but all
+                  arguments are quoted against further expansion.
+
+     ddeeffnn(_n_a_m_e, _._._.)
+                  Returns the quoted definition for each argument.  This can
+                  be used to rename macro definitions (even for built-in
+                  macros).
+
+     ddiivveerrtt(_n_u_m)  There are 10 output queues (numbered 0-9).  At the end of
+                  processing mm44 concatenates all the queues in numerical order
+                  to produce the final output.  Initially the output queue is
+                  0.  The divert macro allows you to select a new output queue
+                  (an invalid argument passed to divert causes output to be
+                  discarded).
+
+     ddiivvnnuumm       Returns the current output queue number.
+
+     ddnnll          Discard input characters up to and including the next new‐
+                  line.
+
+     dduummppddeeff(_n_a_m_e, _._._.)
+                  Prints the names and definitions for the named items, or for
+                  everything if no arguments are passed.
+
+     eerrrrpprriinntt(_m_s_g)
+                  Prints the first argument on the standard error output
+                  stream.
+
+     eessyyssccmmdd(_c_m_d)
+                  Passes its first argument to a shell and returns the shell's
+                  standard output.  Note that the shell shares its standard
+                  input and standard error with mm44.
+
+     eevvaall(_e_x_p_r)   Computes the first argument as an arithmetic expression
+                  using 32-bit arithmetic.  Operators are the standard C
+                  ternary, arithmetic, logical, shift, relational, bitwise,
+                  and parentheses operators.  You can specify octal, decimal,
+                  and hexadecimal numbers as in C.  The second argument (if
+                  any) specifies the radix for the result and the third argu‐
+                  ment (if any) specifies the minimum number of digits in the
+                  result.
+
+     eexxpprr(_e_x_p_r)   This is an alias for eevvaall.
+
+     ffoorrmmaatt(_f_o_r_m_a_t_s_t_r_i_n_g, _a_r_g_1, _._._.)
+                  Returns _f_o_r_m_a_t_s_t_r_i_n_g with escape sequences substituted with
+                  _a_r_g_1 and following arguments, in a way similar to printf(3).
+                  This built-in is only available in GNU-m4 compatibility
+                  mode, and the only parameters implemented are there for
+                  autoconf compatibility: left-padding flag, an optional field
+                  width, a maximum field width, *-specified field widths, and
+                  the %s and %c data type.
+
+     iiffddeeff(_n_a_m_e, _y_e_s, _n_o)
+                  If the macro named by the first argument is defined then
+                  return the second argument, otherwise the third.  If there
+                  is no third argument, the value is NULL.  The word "unix" is
+                  predefined.
+
+     iiffeellssee(_a, _b, _y_e_s, _._._.)
+                  If the first argument _a matches the second argument _b then
+                  iiffeellssee() returns the third argument _y_e_s.  If the match fails
+                  the three arguments are discarded and the next three argu‐
+                  ments are used until there is zero or one arguments left,
+                  either this last argument or NULL is returned if no other
+                  matches were found.
+
+     iinncclluuddee(_n_a_m_e)
+                  Returns the contents of the file specified in the first
+                  argument.  If the file is not found as is, look through the
+                  include path: first the directories specified with --II on the
+                  command line, then the environment variable M4PATH, as a
+                  colon-separated list of directories.  Include aborts with an
+                  error message if the file cannot be included.
+
+     iinnccrr(_a_r_g)    Increments the argument by 1.  The argument must be a valid
+                  numeric string.
+
+     iinnddeexx(_s_t_r_i_n_g, _s_u_b_s_t_r_i_n_g)
+                  Returns the index of the second argument in the first argu‐
+                  ment (e.g., iinnddeexx((tthhee qquuiicckk bbrroowwnn ffooxx jjuummppeedd,, ffooxx)) returns
+                  16).  If the second argument is not found index returns -1.
+
+     iinnddiirr(_m_a_c_r_o, _a_r_g_1, _._._.)
+                  Indirectly calls the macro whose name is passed as the first
+                  argument, with the remaining arguments passed as first, ...
+                  arguments.
+
+     lleenn(_a_r_g)     Returns the number of characters in the first argument.
+                  Extra arguments are ignored.
+
+     mm44eexxiitt(_c_o_d_e)
+                  Immediately exits with the return value specified by the
+                  first argument, 0 if none.
+
+     mm44wwrraapp(_t_o_d_o)
+                  Allows you to define what happens at the final EOF, usually
+                  for cleanup purposes (e.g., mm44wwrraapp((""cclleeaannuupp((tteemmppffiillee))""))
+                  causes the macro cleanup to be invoked after all other pro‐
+                  cessing is done).
+
+                  Multiple calls to mm44wwrraapp() get inserted in sequence at the
+                  final EOF.
+
+     mmaakkeetteemmpp(_t_e_m_p_l_a_t_e)
+                  Like mmkksstteemmpp.
+
+     mmkksstteemmpp(_t_e_m_p_l_a_t_e)
+                  Invokes mkstemp(3) on the first argument, and returns the
+                  modified string.  This can be used to create unique tempo‐
+                  rary file names.
+
+     ppaassttee(_f_i_l_e)  Includes the contents of the file specified by the first
+                  argument without any macro processing.  Aborts with an error
+                  message if the file cannot be included.
+
+     ppaattssuubbsstt(_s_t_r_i_n_g, _r_e_g_e_x_p, _r_e_p_l_a_c_e_m_e_n_t)
+                  Substitutes a regular expression in a string with a replace‐
+                  ment string.  Usual substitution patterns apply: an amper‐
+                  sand (‘&’) is replaced by the string matching the regular
+                  expression.  The string ‘\#’, where ‘#’ is a digit, is
+                  replaced by the corresponding back-reference.
+
+     ppooppddeeff(_a_r_g, _._._.)
+                  Restores the ppuusshhddeeffed definition for each argument.
+
+     ppuusshhddeeff(_m_a_c_r_o, _d_e_f)
+                  Takes the same arguments as ddeeffiinnee, but it saves the defini‐
+                  tion on a stack for later retrieval by ppooppddeeff().
+
+     rreeggeexxpp(_s_t_r_i_n_g, _r_e_g_e_x_p, _r_e_p_l_a_c_e_m_e_n_t)
+                  Finds a regular expression in a string.  If no further argu‐
+                  ments are given, it returns the first match position or -1
+                  if no match.  If a third argument is provided, it returns
+                  the replacement string, with sub-patterns replaced.
+
+     sshhiifftt(_a_r_g_1, _._._.)
+                  Returns all but the first argument, the remaining arguments
+                  are quoted and pushed back with commas in between.  The
+                  quoting nullifies the effect of the extra scan that will
+                  subsequently be performed.
+
+     ssiinncclluuddee(_f_i_l_e)
+                  Similar to iinncclluuddee, except it ignores any errors.
+
+     ssppaassttee(_f_i_l_e)
+                  Similar to ppaassttee(), except it ignores any errors.
+
+     ssuubbssttrr(_s_t_r_i_n_g, _o_f_f_s_e_t, _l_e_n_g_t_h)
+                  Returns a substring of the first argument starting at the
+                  offset specified by the second argument and the length spec‐
+                  ified by the third argument.  If no third argument is
+                  present it returns the rest of the string.
+
+     ssyyssccmmdd(_c_m_d)  Passes the first argument to the shell.  Nothing is
+                  returned.
+
+     ssyyssvvaall       Returns the return value from the last ssyyssccmmdd.
+
+     ttrraacceeoonn(_a_r_g, _._._.)
+                  Enables tracing of macro expansions for the given arguments,
+                  or for all macros if no argument is given.
+
+     ttrraacceeooffff(_a_r_g, _._._.)
+                  Disables tracing of macro expansions for the given argu‐
+                  ments, or for all macros if no argument is given.
+
+     ttrraannsslliitt(_s_t_r_i_n_g, _m_a_p_f_r_o_m, _m_a_p_t_o)
+                  Transliterate the characters in the first argument from the
+                  set given by the second argument to the set given by the
+                  third.  You cannot use tr(1) style abbreviations.
+
+     uunnddeeffiinnee(_n_a_m_e_1, _._._.)
+                  Removes the definition for the macros specified by its argu‐
+                  ments.
+
+     uunnddiivveerrtt(_a_r_g, _._._.)
+                  Flushes the named output queues (or all queues if no argu‐
+                  ments).
+
+     uunniixx         A pre-defined macro for testing the OS platform.
+
+     ____lliinnee____     Returns the current file's line number.
+
+     ____ffiillee____     Returns the current file's name.
+
+EEXXIITT SSTTAATTUUSS
+     The mm44 utility exits 0 on success, and >0 if an error occurs.
+
+     But note that the mm44eexxiitt macro can modify the exit status.
+
+SSTTAANNDDAARRDDSS
+     The mm44 utility is mostly compliant with the IEEE Std 1003.1-2008
+     (“POSIX.1”) specification.
+
+     The flags [--ddggIIoott] and the macros bbuuiillttiinn, eessyyssccmmdd, eexxpprr, ffoorrmmaatt, iinnddiirr,
+     ppaassttee, ppaattssuubbsstt, rreeggeexxpp, ssppaassttee, uunniixx, ____lliinnee____, and ____ffiillee____ are exten‐
+     sions to that specification.
+
+     mmaakkeetteemmpp is not supposed to be a synonym for mmkksstteemmpp, but instead to be
+     an insecure temporary file name creation function.  The change causes no
+     known compatibility issues.
+
+     The output format of tracing and of dduummppddeeff are not specified in any
+     standard, are likely to change and should not be relied upon.  The cur‐
+     rent format of tracing is closely modelled on ggnnuu--mm44, to allow aauuttooccoonnff
+     to work.
+
+     The built-ins ppuusshhddeeff and ppooppddeeff handle macro definitions as a stack.
+     However, ddeeffiinnee interacts with the stack in an undefined way.  In this
+     implementation, ddeeffiinnee replaces the top-most definition only.  Other
+     implementations may erase all definitions on the stack instead.
+
+     All built-ins do expand without arguments in many other mm44.
+
+     Many other mm44 have dire size limitations with respect to buffer sizes.
+
+AAUUTTHHOORRSS
+     Ozan Yigit ⟨oz@sis.yorku.ca⟩ and Richard A. O'Keefe
+     ⟨ok@goanna.cs.rmit.OZ.AU⟩.
+
+     GNU-m4 compatibility extensions by Marc Espie ⟨espie@cvs.openbsd.org⟩.
+
+BSD                             August 8, 2012                             BSD
